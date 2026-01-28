@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>e-Office Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!--this error is normal it is not causing any problem-->
+    <script>
+        const dashboardData = {{ data | tojson }};
+    </script>
+
+</head>
+
+<body>
+
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="header">
+
+        <h1>e-Office Dashboard</h1>
+
+        <div style="display:flex; align-items:center; gap:15px;">
+
+            <small style="font-size:13px;color:#e3f2fd;">
+                Last Refreshed: {{ last_refresh }}
+            </small>
+
+            <a href="/logout">Logout</a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <div class="page-layout">
+        <!-- ================= FILTER SIDEBAR ================= -->
+
+        <div class="filter-sidebar">
+
+            <h3>Filters</h3>
+
+            <div class="filter-box">
+
+                <h4>Department</h4>
+
+                <!-- Search -->
+                <input type="text" id="deptSearch" placeholder="Search..." onkeyup="filterDeptList()">
+
+
+                <!-- Department List -->
+                <div class="dept-list" id="deptList">
+
+                    {% for dept in departments %}
+
+                    <label class="dept-item">
+
+                        <input type="checkbox" value="{{ dept }}">
+
+                        {{ dept }}
+
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+            <!-- Organization Filter -->
+
+            <div class="filter-box">
+
+                <h4>Organization</h4>
+
+                <input type="text" id="orgSearch" placeholder="Search..." onkeyup="filterOrgList()">
+
+                <div class="dept-list" id="orgList">
+
+                    {% for org in organizations %}
+
+                    <label class="dept-item">
+
+                        <input type="checkbox" value="{{ org }}">
+
+                        {{ org }}
+
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+
+
+            </div>
+            <div class="clear-filter-box">
+
+                <button id="clearFiltersBtn" onclick="clearAllFilters()">
+
+                    Clear all Filters
+
+                </button>
+
+            </div>
+
+
+
+
+
+        </div>
+
+
+
+        <div class="dashboard-main">
+
+            <!-- KPI ROW -->
+
+            <div class="kpi-row">
+
+
+                <!-- Files Created -->
+                <div class="kpi-card">
+
+                    <div class="kpi-title">
+                        Files Created
+                    </div>
+
+                    <div class="kpi-value">
+                        {{ data.created.total }}
+
+                    </div>
+
+                    <div class="kpi-sub">
+
+                        <div class="sub-card">
+                            <h3>{{ data.created.electronic }}
+                            </h3>
+                            <p>Electronic</p>
+                        </div>
+
+                        <div class="sub-card">
+                            <h3>{{ data.created.physical }}
+                            </h3>
+                            <p>Physical</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Files Not Moved -->
+
+
+
+                <div class="kpi-card">
+
+                    <div class="kpi-title">
+                        Files Not Moved
+                    </div>
+
+                    <div class="kpi-value">
+                        {{ data.not_moved.total }}
+                    </div>
+
+                    <div class="kpi-sub">
+
+                        <div class="sub-card">
+                            <h3>{{ data.not_moved.electronic }}</h3>
+                            <p>Electronic</p>
+                        </div>
+
+                        <div class="sub-card">
+                            <h3>{{ data.not_moved.physical }}</h3>
+                            <p>Physical</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Files Moved -->
+
+
+
+                <div class="kpi-card">
+
+                    <div class="kpi-title">
+                        Files Moved
+                    </div>
+
+                    <div class="kpi-value">
+                        {{ data.moved.total }}
+                    </div>
+
+                    <div class="kpi-sub">
+
+                        <div class="sub-card">
+                            <h3>{{ data.moved.electronic }}</h3>
+                            <p>Electronic</p>
+                        </div>
+
+                        <div class="sub-card">
+                            <h3>{{ data.moved.physical }}</h3>
+                            <p>Physical</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Files Pending -->
+
+
+
+                <div class="kpi-card">
+
+                    <div class="kpi-title">
+                        Files Pending
+                    </div>
+
+                    <div class="kpi-value">
+                        {{ data.pending.total }}
+                    </div>
+
+                    <div class="kpi-sub">
+
+                        <div class="sub-card">
+                            <h3>{{ data.pending.electronic }}</h3>
+                            <p>Electronic</p>
+                        </div>
+
+                        <div class="sub-card">
+                            <h3>{{ data.pending.physical }}</h3>
+                            <p>Physical</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Closed Files -->
+
+
+
+                <div class="kpi-card">
+
+                    <div class="kpi-title">
+                        Closed Files
+                    </div>
+
+                    <div class="kpi-value">
+                        {{ data.closed.total }}
+                    </div>
+
+                    <div class="kpi-sub">
+
+                        <div class="sub-card">
+                            <h3>{{ data.closed.electronic }}</h3>
+                            <p>Electronic</p>
+                        </div>
+
+                        <div class="sub-card">
+                            <h3>{{ data.closed.physical }}</h3>
+                            <p>Physical</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+            <!-- ================= INTERACTIVE METERS ================= -->
+
+            <div class="meter-row">
+
+
+                <!-- Active Users -->
+
+                <div class="meter-card active-box">
+
+                    <h2>Active Users</h2>
+
+                    <div class="count">
+                        {{ data.active_users }}
+                    </div>
+
+                </div>
+
+
+                <!-- Not Moved -->
+
+                <div class="meter-card">
+
+                    <h2>Not Moved File %</h2>
+
+                    <div class="chart-container"><canvas id="notMovedChart"></canvas></div>
+
+                    <p class="percent-label">
+                        {{ data.not_moved.percent }}%
+                    </p>
+
+                </div>
+
+
+                <!-- Pending -->
+
+                <div class="meter-card">
+
+                    <h2>Pending File %</h2>
+
+                    <div class="chart-container"><canvas id="pendingChart"></canvas></div>
+
+                    <p class="percent-label">
+                        {{ data.pending.percent }}%
+                    </p>
+
+                </div>
+
+
+                <!-- Closed -->
+
+                <div class="meter-card">
+
+                    <h2>Closed File %</h2>
+
+                    <div class="chart-container"><canvas id="closedChart"></canvas></div>
+
+                    <p class="percent-label">
+                        {{ data.closed.percent }}%
+                    </p>
+
+                </div>
+
+            </div>
+            <div class="table-section">
+
+                <h3>Department & Organization Wise Details</h3>
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+<tr>
+    <th>Department</th>
+    <th class="org-col">Organization</th>
+
+    <th onclick="sortTable(2)">
+        Files Created <span class="sort-arrow" id="arrow-2">↓</span>
+    </th>
+
+    <th onclick="sortTable(3)">
+        Total Moved <span class="sort-arrow" id="arrow-3">↓</span>
+    </th>
+
+    <th>Moved %</th>
+
+    <th onclick="sortTable(5)">
+        Files Not Moved <span class="sort-arrow" id="arrow-5">↓</span>
+    </th>
+
+    <th>Not Moved %</th>
+
+    <th onclick="sortTable(7)">
+        Files Pending <span class="sort-arrow" id="arrow-7">↓</span>
+    </th>
+
+    <th>Pending %</th>
+
+    <th onclick="sortTable(9)">
+        Files Closed <span class="sort-arrow" id="arrow-9">↓</span>
+    </th>
+
+    <th>Closed %</th>
+</tr>
+</thead>
+
+
+
+                        <tbody>
+
+                            {% for row in table_data %}
+
+                            <tr {% if row.DepartmentName=='Total' %} class="total-row" {% endif %}>
+
+                                <td>{{ row.DepartmentName }}</td>
+
+                                <td>{{ row.OrgName }}</td>
+
+                                <td>{{ row.created }}</td>
+
+                                <td>{{ row.moved }}</td>
+
+                                <td>{{ row.moved_pct }}%</td>
+
+                                <td>{{ row.not_moved }}</td>
+
+                                <td>{{ row.not_moved_pct }}%</td>
+
+                                <td>{{ row.pending }}</td>
+
+                                <td>{{ row.pending_pct }}%</td>
+
+                                <td>{{ row.closed }}</td>
+
+                                <td>{{ row.closed_pct }}%</td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+        </div>
+        <!-- ================= DETAIL TABLE ================= -->
+
+
+
+
+
+
+
+    </div>
+
+    <script>
+        let notMovedChartObj = null;
+        let pendingChartObj = null;
+        let closedChartObj = null;
+
+
+
+        function createDonutChart(id, mainValue, remainingValue, label, color, chartVar) {
+
+            const ctx = document.getElementById(id);
+
+
+            // Destroy old chart if exists
+            if (chartVar) {
+                chartVar.destroy();
+            }
+
+
+            return new Chart(ctx, {
+
+                type: 'doughnut',
+
+                data: {
+                    labels: [label, 'Remaining'],
+                    datasets: [{
+                        data: [mainValue, remainingValue],
+                        backgroundColor: [color, '#eeeeee'],
+                        borderWidth: 0
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    cutout: '70%',
+
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+
+            });
+        }
+
+
+
+
+        // ================= INIT =================
+
+
+        notMovedChartObj = createDonutChart(
+            'notMovedChart',
+            dashboardData.not_moved.total,
+            dashboardData.not_moved.remaining,
+            'Not Moved',
+            '#ff9800',
+            notMovedChartObj
+        );
+
+
+        pendingChartObj = createDonutChart(
+            'pendingChart',
+            dashboardData.pending.total,
+            dashboardData.pending.remaining,
+            'Pending',
+            '#4caf50',
+            pendingChartObj
+        );
+
+
+        closedChartObj = createDonutChart(
+            'closedChart',
+            dashboardData.closed.total,
+            dashboardData.closed.remaining,
+            'Closed',
+            '#2196f3',
+            closedChartObj
+        );
+
+
+    </script>
+    <script>
+
+        function filterDeptList() {
+
+            let input = document.getElementById("deptSearch");
+            let filter = input.value.toLowerCase();
+
+            let list = document.getElementById("deptList");
+            let items = list.getElementsByClassName("dept-item");
+
+            for (let i = 0; i < items.length; i++) {
+
+                let txt = items[i].innerText.toLowerCase();
+
+                if (txt.includes(filter)) {
+
+                    items[i].style.display = "";
+
+                } else {
+
+                    items[i].style.display = "none";
+                }
+            }
+        }
+
+    </script>
+    <script>
+
+        /* Organization Search */
+        function filterOrgList() {
+
+            let val = document
+                .getElementById("orgSearch")
+                .value
+                .toLowerCase();
+
+            document
+                .querySelectorAll("#orgList .dept-item")
+                .forEach(item => {
+
+                    item.style.display =
+                        item.innerText.toLowerCase().includes(val)
+                            ? ""
+                            : "none";
+                });
+        }
+
+
+        /* Clear All Filters */
+        function clearAllFilters() {
+
+            // Uncheck all
+            document
+                .querySelectorAll('.filter-sidebar input[type="checkbox"]')
+                .forEach(cb => cb.checked = false);
+
+
+            // Clear search
+            document.getElementById("deptSearch").value = "";
+
+
+            // Reload dashboard
+            updateByDepartment();
+        }
+
+
+    </script>
+
+    <script>
+
+        function getSelectedDepartments() {
+
+            let depts = [];
+
+            document
+                .querySelectorAll("#deptList input:checked")
+                .forEach(cb => depts.push(cb.value));
+
+            return depts;
+        }
+
+
+        // Add event on every dept checkbox
+        document
+            .querySelectorAll("#deptList input")
+            .forEach(cb => {
+
+                cb.addEventListener("change", updateByDepartment);
+
+            });
+
+
+        function updateByDepartment() {
+
+            let departments = getSelectedDepartments();
+
+
+            // KPI + Charts
+            fetch("/api/filter/department", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({ departments })
+
+            })
+                .then(r => r.json())
+                .then(data => updateKPIs(data));
+
+
+            // Table
+            fetch("/api/filter/table", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({ departments })
+
+            })
+                .then(r => r.json())
+                .then(rows => updateTable(rows));
+            // ================= UPDATE ORGANIZATION LIST =================
+
+            fetch("/api/filter/org-by-dept", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({ departments })
+
+            })
+                .then(res => res.json())
+                .then(orgs => updateOrgList(orgs));
+
+        }
+
+
+
+        // Update KPI cards
+        function updateKPIs(data) {
+
+            let cards = document.querySelectorAll(".kpi-card");
+
+
+            // Files Created
+            cards[0].querySelector(".kpi-value").innerText =
+                data.created.total;
+
+            cards[0].querySelectorAll("h3")[0].innerText =
+                data.created.electronic;
+
+            cards[0].querySelectorAll("h3")[1].innerText =
+                data.created.physical;
+
+
+            // Not Moved
+            cards[1].querySelector(".kpi-value").innerText =
+                data.not_moved.total;
+
+            cards[1].querySelectorAll("h3")[0].innerText =
+                data.not_moved.electronic;
+
+            cards[1].querySelectorAll("h3")[1].innerText =
+                data.not_moved.physical;
+
+            // Files Moved
+            cards[2].querySelector(".kpi-value").innerText =
+                data.moved.total;
+
+            cards[2].querySelectorAll("h3")[0].innerText =
+                data.moved.electronic;
+
+            cards[2].querySelectorAll("h3")[1].innerText =
+                data.moved.physical;
+
+            // Pending
+            cards[3].querySelector(".kpi-value").innerText =
+                data.pending.total;
+
+            cards[3].querySelectorAll("h3")[0].innerText =
+                data.pending.electronic;
+
+            cards[3].querySelectorAll("h3")[1].innerText =
+                data.pending.physical;
+
+
+            // Closed
+            cards[4].querySelector(".kpi-value").innerText =
+                data.closed.total;
+
+            cards[4].querySelectorAll("h3")[0].innerText =
+                data.closed.electronic;
+
+            cards[4].querySelectorAll("h3")[1].innerText =
+                data.closed.physical;
+            // ================= ACTIVE USERS =================
+
+            document.querySelector(".active-box .count").innerText =
+                data.active_users;
+
+
+            // ================= UPDATE CHARTS =================
+
+
+            notMovedChartObj = createDonutChart(
+                'notMovedChart',
+                data.not_moved.total,
+                data.not_moved.remaining,
+                'Not Moved',
+                '#ff9800',
+                notMovedChartObj
+            );
+
+
+            pendingChartObj = createDonutChart(
+                'pendingChart',
+                data.pending.total,
+                data.pending.remaining,
+                'Pending',
+                '#4caf50',
+                pendingChartObj
+            );
+
+
+            closedChartObj = createDonutChart(
+                'closedChart',
+                data.closed.total,
+                data.closed.remaining,
+                'Closed',
+                '#2196f3',
+                closedChartObj
+            );
+
+
+            // ================= PERCENT LABELS =================
+
+            document.querySelectorAll(".percent-label")[0].innerText =
+                data.not_moved.percent + "%";
+
+            document.querySelectorAll(".percent-label")[1].innerText =
+                data.pending.percent + "%";
+
+            document.querySelectorAll(".percent-label")[2].innerText =
+                data.closed.percent + "%";
+
+        }
+
+        function updateTable(rows) {
+
+            let tbody = document.querySelector("table tbody");
+
+            tbody.innerHTML = "";
+
+
+            rows.forEach(row => {
+
+                let tr = document.createElement("tr");
+
+                if (row.DepartmentName === "Total") {
+                    tr.classList.add("total-row");
+                }
+
+
+                tr.innerHTML = `
+
+            <td class="dept-click" onclick="filterFromTable('${row.DepartmentName}')">
+    ${row.DepartmentName}
+</td>
+
+            <td class="org-col">${row.OrgName}</td>
+
+
+            <td>${row.created}</td>
+
+            <td>${row.moved}</td>
+            <td>${row.moved_pct}%</td>
+
+            <td>${row.not_moved}</td>
+            <td>${row.not_moved_pct}%</td>
+
+            <td>${row.pending}</td>
+            <td>${row.pending_pct}%</td>
+
+            <td>${row.closed}</td>
+            <td>${row.closed_pct}%</td>
+        `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateOrgList(orgs) {
+
+            let orgList = document.getElementById("orgList");
+
+            orgList.innerHTML = "";
+
+            orgs.forEach(org => {
+
+                let label = document.createElement("label");
+
+                label.className = "dept-item";
+
+                label.innerHTML = `
+            <input type="checkbox" value="${org}">
+            ${org}
+        `;
+
+                orgList.appendChild(label);
+            });
+        }
+
+
+    </script>
+
+    <script>
+        // Load all organizations on first page load
+        window.onload = function () {
+            updateByDepartment();
+        };
+    </script>
+    <script>
+        function filterFromTable(deptName) {
+
+            // Uncheck all departments
+            document
+                .querySelectorAll("#deptList input")
+                .forEach(cb => cb.checked = false);
+
+            // Check clicked department
+            document
+                .querySelectorAll("#deptList input")
+                .forEach(cb => {
+
+                    if (cb.value === deptName) {
+                        cb.checked = true;
+                    }
+
+                });
+
+            // Reload dashboard
+            updateByDepartment();
+        }
+    </script>
+
+
+
+
+<script>
+
+let sortDirections = {
+    2: "desc",
+    3: "desc",
+    5: "desc",
+    7: "desc",
+    9: "desc"
+};
+
+function sortTable(colIndex) {
+
+    const table = document.querySelector("table");
+    const tbody = table.querySelector("tbody");
+
+    let rows = Array.from(tbody.querySelectorAll("tr"));
+
+    // Separate total row
+    let totalRow = rows.find(r =>
+        r.classList.contains("total-row")
+    );
+
+    let dataRows = rows.filter(r =>
+        !r.classList.contains("total-row")
+    );
+
+
+    // Toggle direction
+    let direction = sortDirections[colIndex] === "asc"
+        ? "desc"
+        : "asc";
+
+    sortDirections[colIndex] = direction;
+
+
+    // Reset arrows to ↓
+    document.querySelectorAll(".sort-arrow")
+        .forEach(a => a.innerText = "↓");
+
+
+    // Set active arrow
+    const arrow = document.getElementById("arrow-" + colIndex);
+
+    arrow.innerText = direction === "asc" ? "↑" : "↓";
+
+
+    // Sort
+    dataRows.sort((a, b) => {
+
+        let A = parseFloat(a.children[colIndex].innerText) || 0;
+        let B = parseFloat(b.children[colIndex].innerText) || 0;
+
+        return direction === "asc"
+            ? A - B
+            : B - A;
+    });
+
+
+    // Rebuild
+    tbody.innerHTML = "";
+
+    dataRows.forEach(r => tbody.appendChild(r));
+
+    if (totalRow) tbody.appendChild(totalRow);
+}
+
+</script>
+
+<script>
+
+function handleOrgFilter(){
+
+    let selectedOrg = null;
+
+    document
+        .querySelectorAll("#orgList input:checked")
+        .forEach(cb => {
+            selectedOrg = cb.value;
+        });
+
+
+    // If no org selected → normal mode
+    if(!selectedOrg){
+        updateByDepartment();
+        return;
+    }
+
+
+    // Clear departments
+    document
+        .querySelectorAll("#deptList input")
+        .forEach(cb => cb.checked = false);
+
+
+    // Only update TABLE (not KPI / charts)
+    fetch("/api/filter/table-by-org", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            organization: selectedOrg
+        })
+
+    })
+    .then(res => res.json())
+    .then(rows => updateTable(rows));
+
+}
+
+</script>
+<script>
+
+function handleOrgFilter(){
+
+    let selectedOrg = null;
+
+    document
+        .querySelectorAll("#orgList input:checked")
+        .forEach(cb => {
+            selectedOrg = cb.value;
+        });
+
+
+    // No org selected → normal
+    if(!selectedOrg){
+        updateByDepartment();
+        return;
+    }
+
+
+    // Clear departments
+    document
+        .querySelectorAll("#deptList input")
+        .forEach(cb => cb.checked = false);
+
+
+    // Only update TABLE
+    fetch("/api/filter/table-by-org", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            organization: selectedOrg
+        })
+
+    })
+    .then(res => res.json())
+    .then(rows => updateTable(rows));
+}
+
+</script>
+
+<script>
+
+document.addEventListener("change", function(e){
+
+    if(e.target.closest("#orgList") && e.target.type === "checkbox"){
+
+        document
+            .querySelectorAll("#orgList input[type='checkbox']")
+            .forEach(cb => {
+                if(cb !== e.target){
+                    cb.checked = false;
+                }
+            });
+
+        handleOrgFilter();
+    }
+
+});
+
+</script>
+
+
+</body>
+
+</html>
